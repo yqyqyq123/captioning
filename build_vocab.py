@@ -2,6 +2,7 @@ import nltk
 import pickle
 import argparse
 from collections import Counter
+import operator
 from pycocotools.coco import COCO
 nltk.download('punkt')
 
@@ -26,28 +27,36 @@ class Vocabulary(object):
     def __len__(self):
         return len(self.word2idx)
 
-def build_vocab(json, threshold):
+def build_vocab(json, threshold=4,most_frequent=1000):
     """Build a simple vocabulary wrapper."""
+    lm = nltk.stem.WordNetLemmatizer()
     coco = COCO(json)
     counter = Counter()
     ids = coco.anns.keys()
     for i, id in enumerate(ids):
         caption = str(coco.anns[id]['caption'])
         tokens = nltk.tokenize.word_tokenize(caption.lower())
+        tokens = [lm.lemmatize(word) for word in tokens]
         counter.update(tokens)
 
         if (i+1) % 1000 == 0:
             print("[{}/{}] Tokenized the captions.".format(i+1, len(ids)))
 
-    # If the word frequency is less than 'threshold', then the word is discarded.
-    words = [word for word, cnt in counter.items() if cnt >= threshold]
-
+   
+    
+    #words = [word for word, cnt in counter.items() if cnt >= threshold]
+    c = dict(counter)
+    
+    sorted_x = dict(sorted(c.items(), key=operator.itemgetter(1),reverse=True))
+    words = list(sorted_x.keys())[:most_frequent]
+    print(len(words))
     # Create a vocab wrapper and add some special tokens.
     vocab = Vocabulary()
     vocab.add_word('<pad>')
     vocab.add_word('<start>')
     vocab.add_word('<end>')
     vocab.add_word('<unk>')
+
 
     # Add the words to the vocabulary.
     for i, word in enumerate(words):

@@ -41,7 +41,7 @@ def main(args):
     # Build data loader
     data_loader = get_loader(args.image_dir, args.caption_path, vocab, 
                              transform, args.batch_size,
-                             shuffle=True, num_workers=args.num_workers) 
+                             shuffle=True, num_workers=args.num_workers)
     val_loader = get_loader(args.val_dir, args.val_caption_path, vocab,
                              transform_val, args.batch_size,
                              shuffle=False, num_workers=args.num_workers)
@@ -81,7 +81,8 @@ def main(args):
             # Print log info
             if i % args.log_step == 0:
                 print('Epoch [{}/{}], Step [{}/{}], Loss: {:.4f}, Perplexity: {:5.4f}'
-                      .format(epoch, args.num_epochs, i, total_step, loss.item(), np.exp(loss.item()))) 
+                      .format(epoch+1, args.num_epochs, i, total_step, loss.item(), np.exp(loss.item()))) 
+                
             # Save the model checkpoints
             if (i+1) % args.save_step == 0:
                 torch.save(decoder.state_dict(), os.path.join(
@@ -96,8 +97,18 @@ def main(args):
         b3s.append(b3)
         b4s.append(b4)
         avg_loss = sum(losses)/total_step
-        print('Epoch {} Average Training Loss: {:.4f}'.format(epoch, avg_loss))
         
+        print('Epoch {} Average Training Loss: {:.4f}'.format(epoch+1, avg_loss))
+        
+        with open ('lemma_result_freq1000.txt', 'a') as file:
+            file.write("Epoch {} \n".format(epoch+1))
+            file.write('Average Accuracy: {} \n'.format(acc))
+            file.write('Average BLEU gram1: {} \n'.format(b1))
+            file.write('Average BLEU gram2: {} \n'.format(b2))
+            file.write('Average BLEU gram3: {} \n'.format(b3))
+            file.write('Average BLEU gram4: {} \n'.format(b4))
+            file.write('\n')
+                
     plt.title("Accuracy vs BLEU score")
     plt.plot(np.arange(1,args.num_epochs+1),accs, label='accuracy')
     plt.plot(np.arange(1,args.num_epochs+1),b1s, label='BLEU 1')
@@ -151,6 +162,7 @@ def evaluate(data_loader, encoder, decoder, vocab):
         print('Average BLEU gram2: {}'.format(bleu_gram2/total_step))
         print('Average BLEU gram3: {}'.format(bleu_gram3/total_step))
         print('Average BLEU gram4: {}'.format(bleu_gram4/total_step))
+
         
         return accuracy/total_step, bleu_gram1/total_step, bleu_gram2/total_step, bleu_gram3/total_step, bleu_gram4/total_step
         
@@ -171,7 +183,7 @@ if __name__ == '__main__':
     parser.add_argument('--hidden_size', type=int , default=512, help='dimension of lstm hidden states')
     parser.add_argument('--num_layers', type=int , default=1, help='number of layers in lstm')
     
-    parser.add_argument('--num_epochs', type=int, default=2)
+    parser.add_argument('--num_epochs', type=int, default=5)
     parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--num_workers', type=int, default=2)
     parser.add_argument('--learning_rate', type=float, default=0.001)
