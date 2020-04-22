@@ -47,8 +47,8 @@ def main(args):
                              shuffle=False, num_workers=args.num_workers)
     # Build the models
     encoder = EncoderCNN(args.embed_size).to(device)
-    decoder = DecoderRNN(args.embed_size, args.hidden_size, len(vocab), args.num_layers).to(device)
-#     decoder = BahdanauAttnDecoderRNN(args.hidden_size, args.embed_size, len(vocab)).to(device)
+    #decoder = DecoderRNN(args.embed_size, args.hidden_size, len(vocab), args.num_layers).to(device)
+    decoder = BahdanauAttnDecoderRNN(args.hidden_size, args.embed_size, len(vocab)).to(device)
     
     # Loss and optimizer
     criterion = nn.CrossEntropyLoss()
@@ -100,7 +100,7 @@ def main(args):
         
         print('Epoch {} Average Training Loss: {:.4f}'.format(epoch+1, avg_loss))
         
-        with open ('lemma_result_freq1000.txt', 'a') as file:
+        with open ('lemma_attention_result_freq1000.txt', 'a') as file:
             file.write("Epoch {} \n".format(epoch+1))
             file.write('Average Accuracy: {} \n'.format(acc))
             file.write('Average Loss: {} \n'.format(avg_loss))
