@@ -103,6 +103,7 @@ def main(args):
         with open ('lemma_result_freq1000.txt', 'a') as file:
             file.write("Epoch {} \n".format(epoch+1))
             file.write('Average Accuracy: {} \n'.format(acc))
+            file.write('Average Loss: {} \n'.format(avg_loss))
             file.write('Average BLEU gram1: {} \n'.format(b1))
             file.write('Average BLEU gram2: {} \n'.format(b2))
             file.write('Average BLEU gram3: {} \n'.format(b3))

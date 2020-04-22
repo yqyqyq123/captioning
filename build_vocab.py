@@ -5,6 +5,7 @@ from collections import Counter
 import operator
 from pycocotools.coco import COCO
 nltk.download('punkt')
+nltk.download('wordnet')
 
 class Vocabulary(object):
     """Simple vocabulary wrapper."""
