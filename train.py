@@ -47,8 +47,8 @@ def main(args):
                              shuffle=False, num_workers=args.num_workers)
     # Build the models
     encoder = EncoderCNN(args.embed_size).to(device)
-    #decoder = DecoderRNN(args.embed_size, args.hidden_size, len(vocab), args.num_layers).to(device)
-    decoder = BahdanauAttnDecoderRNN(args.hidden_size, args.embed_size, len(vocab)).to(device)
+    decoder = DecoderRNN(args.embed_size, args.hidden_size, len(vocab), args.num_layers).to(device)
+#     decoder = BahdanauAttnDecoderRNN(args.hidden_size, args.embed_size, len(vocab)).to(device)
     
     # Loss and optimizer
     criterion = nn.CrossEntropyLoss()
@@ -90,17 +90,17 @@ def main(args):
                 torch.save(encoder.state_dict(), os.path.join(
                     args.model_path, 'encoder-{}-{}.ckpt'.format(epoch+1, i+1)))
         
-        acc, b1, b2, b3, b4 = evaluate(val_loader, encoder, decoder, vocab)
-        accs.append(acc)
-        b1s.append(b1)
-        b2s.append(b2)
-        b3s.append(b3)
-        b4s.append(b4)
+#         acc, b1, b2, b3, b4 = evaluate(val_loader, encoder, decoder, vocab)
+#         accs.append(acc)
+#         b1s.append(b1)
+#         b2s.append(b2)
+#         b3s.append(b3)
+#         b4s.append(b4)
         avg_loss = sum(losses)/total_step
         
         print('Epoch {} Average Training Loss: {:.4f}'.format(epoch+1, avg_loss))
         
-        with open ('lemma_attention_result_freq1000.txt', 'a') as file:
+        with open ('stem_freeze_freq1000.txt', 'a') as file:
             file.write("Epoch {} \n".format(epoch+1))
             file.write('Average Accuracy: {} \n'.format(acc))
             file.write('Average Loss: {} \n'.format(avg_loss))

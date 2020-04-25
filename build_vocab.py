@@ -28,16 +28,23 @@ class Vocabulary(object):
     def __len__(self):
         return len(self.word2idx)
 
-def build_vocab(json, threshold=4,most_frequent=1000):
+def build_vocab(json, option, threshold, most_frequent):
     """Build a simple vocabulary wrapper."""
-    lm = nltk.stem.WordNetLemmatizer()
+    if option == "stem":
+        nl = nltk.stem.PorterStemmer()
+    else:
+        nl = stem.WordNetLemmatizer()
+        
     coco = COCO(json)
     counter = Counter()
     ids = coco.anns.keys()
     for i, id in enumerate(ids):
         caption = str(coco.anns[id]['caption'])
         tokens = nltk.tokenize.word_tokenize(caption.lower())
-        tokens = [lm.lemmatize(word) for word in tokens]
+        if option == "stem":
+            tokens = [nl.stem(word) for word in tokens]
+        else:
+            tokens = [nl.lemmatize(word) for word in tokens]
         counter.update(tokens)
 
         if (i+1) % 1000 == 0:
@@ -65,8 +72,15 @@ def build_vocab(json, threshold=4,most_frequent=1000):
     return vocab
 
 def main(args):
-    vocab = build_vocab(json=args.caption_path, threshold=args.threshold)
-    vocab_path = args.vocab_path
+    print("Option: {}".format(args.option))
+    if args.option == "stem":
+        vocab_path = args.vocab_stem_path
+    elif args.option == "lemma":
+        vocab_path = args.vocab_lemma_path
+    else:
+        print("No Such Option")
+        return
+    vocab = build_vocab(json=args.caption_path, option = args.option, threshold=args.threshold, most_frequent=args.most_frequent)
     with open(vocab_path, 'wb') as f:
         pickle.dump(vocab, f)
     print("Total vocabulary size: {}".format(len(vocab)))
@@ -78,9 +92,15 @@ if __name__ == '__main__':
     parser.add_argument('--caption_path', type=str, 
                         default="./datasets/coco2014/trainval_coco2014_captions/captions_train2014.json", 
                         help='path for train annotation file')
-    parser.add_argument('--vocab_path', type=str, default="vocab_lemma.pkl", 
-                        help='path for saving vocabulary wrapper')
+    parser.add_argument('--vocab_stem_path', type=str, default="vocab_stem.pkl", 
+                        help='path for saving stem vocabulary wrapper')
+    parser.add_argument('--vocab_lemma_path',type=str, default="vocab_lemma.pkl", 
+                        help='path for saving lemma vocabulary wrapper')
+    parser.add_argument('--option', type=str, default="lemma", 
+                        help='lemma or stem')
     parser.add_argument('--threshold', type=int, default=4, 
                         help='minimum word count threshold')
+    parser.add_argument('--most_frequent', type=int, default=1000, 
+                        help='top most frequent words')
     args = parser.parse_args()
     main(args)
