@@ -13,7 +13,8 @@ class EncoderCNN(nn.Module):
         self.resnet = nn.Sequential(*modules)
         self.linear = nn.Linear(resnet.fc.in_features, embed_size)
         self.bn = nn.BatchNorm1d(embed_size, momentum=0.01)
-        
+        self.init_weights()
+
     def forward(self, images):
         """Extract feature vectors from input images."""
         with torch.no_grad():
@@ -21,6 +22,18 @@ class EncoderCNN(nn.Module):
         features = features.reshape(features.size(0), -1)
         features = self.bn(self.linear(features))
         return features
+
+    def freeze_bottom(self):
+        for p in self.resnet.parameters():
+            p.requires_grad = False
+        for c in list(self.resnet.children())[-2:]: # Only train the last two blocks
+            for p in c.parameters():
+                p.requires_grad = True
+    def init_weights(self):
+        """Initialize the weights."""
+        torch.nn.init.xavier_uniform(self.linear.weight)
+        #self.linear.weight.data.normal_(0.0, 0.02)
+        self.linear.bias.data.fill_(0)
 
 
 class DecoderRNN(nn.Module):
